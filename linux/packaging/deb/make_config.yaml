@@ -1,0 +1,33 @@
+display_name: FlutterCi
+package_name: flutterci
+maintainer:
+  name: flutterci
+  email: linux@flutterci.com
+
+priority: optional
+section: x11
+installed_size: 6604
+essential: false
+icon: ./assets/images/source/ic_launcher_border.png
+
+postinstall_scripts:
+  - echo "Installed FlutterCi"
+postuninstall_scripts:
+  - echo "Surprised Why?"
+
+keywords:
+  - FlutterCi
+  - Proxy
+  - VPN
+  - V2ray
+  - Nekoray
+  - Xray
+  - Psiphon
+  - OpenVPN
+
+generic_name: FlutterCi
+
+categories:
+  - Network
+
+startup_notify: true

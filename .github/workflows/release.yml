@@ -4,8 +4,13 @@ name: Flutter CI
 
 on:
   push:
+    branches:
+      - main
     tags:
       - v*
+  pull_request:
+    branches:
+      - main
     
 jobs:
   build:
@@ -15,28 +20,28 @@ jobs:
       matrix:
         include:
           - platform: android-apk
-            os: ubuntu-latest
+            os: ubuntu-22.04
             targets: apk
 
           - platform: android-aab
-            os: ubuntu-latest
+            os: ubuntu-22.04
             targets: aab
 
-          # - platform: windows
-          #   os: windows-2019
-          #   aarch: amd64
-          #   targets: exe,msix
+          - platform: macos
+            os: macos-13
+            aarch: universal
+            targets: dmg,pkg
 
-          # - platform: linux
-          #   os: ubuntu-22.04
-          #   aarch: amd64
-          #   targets: AppImage,deb,rpm
+          - platform: windows
+            os: windows-2019
+            aarch: amd64
+            targets: exe,msix
 
-          # - platform: macos
-          #   os: macos-13
-          #   aarch: universal
-          #   targets: dmg,pkg
-            
+          - platform: linux
+            os: ubuntu-22.04
+            aarch: amd64
+            targets: appimage,deb,rpm
+  
           # - platform: ios
           #   os: macos-14
           #   aarch: universal
@@ -45,7 +50,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Setup Flutter
@@ -57,6 +62,12 @@ jobs:
           channel: 'stable'
           cache: true
       
+      - name: Get flutter dependencies
+        run: flutter pub get    
+        
+      - name: Install flutter_distributor
+        run: dart pub global activate flutter_distributor
+
       - name: Setup Java
         if: startsWith(matrix.platform,'android')
         uses: actions/setup-java@v4
@@ -64,40 +75,48 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      # - name: Setup NDK
-      #   if: startsWith(matrix.platform,'android')
-      #   uses: nttld/setup-ndk@v1
-      #   id: setup-ndk
-      #   with:
-      #     ndk-version: ${{ env.NDK_VERSION }}
-      #     add-to-path: true
-      #     link-to-sdk: true
-
-      # - name: Setup Gradle 8.1
-      #   if: startsWith(matrix.platform,'android')
-      #   uses: gradle/actions/setup-gradle@v3
-      #   with:
-      #     gradle-version: 7.5
-      # - name: Setup dependencies
-      #   run: |
-      #     make ${{ matrix.platform }}-install-dependencies
-
-      
-      # Get flutter dependencies.
-      - run: flutter pub get    
       # Build apk
       # - run: flutter build apk --target-platform android-arm
-      - run: flutter build apk --release --target-platform=android-arm64 --no-shrink
+      # - run: flutter build apk --release --target-platform=android-arm64 --no-shrink
+      # - run: flutter build ${{ matrix.targets }} --release --target-platform=android-arm64 --no-shrink
+      
+      - name: Build Android app
+        if: startsWith(matrix.platform,'android')
+        run: |
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+
+      - name: Build MacOS app
+        if: startsWith(matrix.platform,'macos')
+        run: |
+          npm install -g appdmg
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+
+      - name: Build Windows app
+        if: startsWith(matrix.platform,'windows')
+        run: |
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+
+      - name: Build Linux app
+        if: startsWith(matrix.platform,'linux')
+        run: |
+          apt install rpm patchelf
+          sudo apt install locate
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          mv appimagetool /usr/local/bin/
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+
       # - name: Upload APK
       #   uses: actions/upload-artifact@v2
       #   with:
       #     name: apk
       #     path: build/app/outputs/apk/release/app-release.apk
-      # 发包
-      - name: Release apk
+
+      - name: Release app
         uses: ncipollo/release-action@v1.5.0
         with:
-          artifacts: "build/app/outputs/apk/release/*.apk"
+          # artifacts: "build/app/outputs/apk/release/*.apk"
+          artifacts: "dist/*/*"
           token: ${{ secrets.GITHUB_TOKEN }}
 
     

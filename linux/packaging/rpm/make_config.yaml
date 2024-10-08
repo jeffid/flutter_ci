@@ -1,0 +1,28 @@
+display_name: FlutterCi
+url: https://github.com/flutterci/flutterci-next/
+license: Other
+
+packager: flutterci
+packagerEmail: linux@flutterci.com
+
+priority: optional
+section: x11
+installed_size: 6604
+essential: false
+icon: ./assets/images/source/ic_launcher_border.png
+
+keywords:
+  - FlutterCi
+  - Proxy
+  - VPN
+  - V2ray
+  - Nekoray
+  - Xray
+  - Psiphon
+  - OpenVPN
+
+generic_name: FlutterCi
+
+group: Applications/Internet
+
+startup_notify: true
