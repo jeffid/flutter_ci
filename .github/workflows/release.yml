@@ -12,6 +12,7 @@ on:
     branches:
       - main
 env:
+  CI_TEST: true
   # FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
 
 jobs:
