@@ -123,6 +123,7 @@ jobs:
   release:
     needs: build
     if: always()
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Download APK from build
