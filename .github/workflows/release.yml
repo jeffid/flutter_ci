@@ -27,12 +27,12 @@ jobs:
             targets: apk,aab
 
           - platform: macos
-            os: macos-13
+            os: macos-latest
             aarch: universal
             targets: dmg,pkg
 
           - platform: windows
-            os: windows-2019
+            os: windows-latest
             aarch: amd64
             targets: exe,msix
 
@@ -94,13 +94,16 @@ jobs:
 
       - name: Build Windows app
         if: startsWith(matrix.platform,'windows')
+        continue-on-error: true
         run: |
+          wmic os get Caption,Version
+          winget install --id JRSoftware.InnoSetup -e -s winget 
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
       - name: Build Linux app
         if: startsWith(matrix.platform,'linux')
         run: |
-          sudo apt-get update
+          # sudo apt-get update
           sudo apt-get install ninja-build
           # echo 'export PATH=$PATH:/usr/bin/ninja' >> ~/.bashrc
           # source ~/.bashrc
