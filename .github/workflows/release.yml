@@ -97,7 +97,7 @@ jobs:
         # continue-on-error: true
         run: |
           wmic os get Caption,Version
-          choco install innosetup -y
+          # choco install innosetup -y
           # choco install winget.powershell -y
           # winget install --id JRSoftware.InnoSetup -e -s winget 
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
