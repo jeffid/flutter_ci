@@ -94,11 +94,12 @@ jobs:
 
       - name: Build Windows app
         if: startsWith(matrix.platform,'windows')
-        continue-on-error: true
+        # continue-on-error: true
         run: |
           wmic os get Caption,Version
-          choco install winget.powershell -y
-          winget install --id JRSoftware.InnoSetup -e -s winget 
+          choco install innosetup -y
+          # choco install winget.powershell -y
+          # winget install --id JRSoftware.InnoSetup -e -s winget 
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
       - name: Build Linux app
