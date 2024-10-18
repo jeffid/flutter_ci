@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - platform: android
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             targets: apk,aab
 
           - platform: macos
@@ -37,7 +37,7 @@ jobs:
             targets: exe,msix
 
           - platform: linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             aarch: amd64
             targets: appimage,deb,rpm
   
@@ -105,16 +105,17 @@ jobs:
       - name: Build Linux app
         if: startsWith(matrix.platform,'linux')
         run: |
-          # sudo apt-get update
-          sudo apt-get install ninja-build
-          # echo 'export PATH=$PATH:/usr/bin/ninja' >> ~/.bashrc
-          # source ~/.bashrc
-          # export CMAKE_MAKE_PROGRAM=$(which ninja)
-          sudo apt install rpm patchelf
-          sudo apt install locate
+          flutter doctor
+          sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev -y
+          # rpm env
+          sudo apt install rpm patchelf -y
+          # appimage env
+          sudo add-apt-repository universe -y
+          sudo apt install libfuse2t64 locate -y
           wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x appimagetool
-          mv appimagetool /usr/local/bin/
+          sudo mv appimagetool /usr/local/bin/
+          # build
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
       - name: Upload app
