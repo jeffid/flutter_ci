@@ -5,13 +5,9 @@ display_name: FlutterCi
 executable_name: FlutterCi.exe
 output_base_file_name: FlutterCi.exe
 create_desktop_icon: true
-install_dir_name: "{autopf64}\\FlutterCi"
+# install_dir_name: "{autopf64}\\FlutterCi"
 setup_icon_file: ..\..\windows\runner\resources\app_icon.ico
 locales:
-  - ar
   - en
-  - fa
-  - ru
-  - pt
-  - tr
+  - zh
 script_template: inno_setup.sas

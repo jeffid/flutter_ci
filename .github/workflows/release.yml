@@ -97,9 +97,13 @@ jobs:
         # continue-on-error: true
         run: |
           wmic os get Caption,Version
+          pwd
           # choco install innosetup -y
           # choco install winget.powershell -y
           # winget install --id JRSoftware.InnoSetup -e -s winget 
+          # cp windows\packaging\exe\ChineseSimplified.isl C:\Program Files (x86)\Inno Setup 6\Languages
+          # cp windows\packaging\exe\ChineseSimplified.isl C:\Program\ Files\ \(x86\)\Inno\ Setup\ 6\Languages
+          cp "windows\packaging\exe\ChineseSimplified.isl" "C:\Program Files (x86)\Inno Setup 6\Languages"
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
       - name: Build Linux app

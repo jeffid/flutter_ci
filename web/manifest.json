@@ -1,6 +1,6 @@
 {
-    "name": "flutter_ci",
-    "short_name": "flutter_ci",
+    "name": "FlutterCi",
+    "short_name": "FlutterCi",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
