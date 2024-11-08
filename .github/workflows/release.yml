@@ -33,20 +33,20 @@ jobs:
             # targets: apk,aab
             targets: apk
 
-          - platform: macos
-            os: macos-latest
-            aarch: universal
-            targets: dmg,pkg
+          # - platform: macos
+          #   os: macos-latest
+          #   aarch: universal
+          #   targets: dmg,pkg
 
-          - platform: windows
-            os: windows-latest
-            aarch: amd64
-            targets: exe,msix
+          # - platform: windows
+          #   os: windows-latest
+          #   aarch: amd64
+          #   targets: exe,msix
 
-          - platform: linux
-            os: ubuntu-24.04
-            aarch: amd64
-            targets: appimage,deb,rpm
+          # - platform: linux
+          #   os: ubuntu-24.04
+          #   aarch: amd64
+          #   targets: appimage,deb,rpm
   
           # - platform: ios
           #   os: macos-14
@@ -88,6 +88,7 @@ jobs:
       
       - name: Build Android app
         if: startsWith(matrix.platform,'android')
+        # continue-on-error: true
         run: |
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
@@ -156,7 +157,7 @@ jobs:
           ls -R
       - name: Get pubspec.yaml version value
         run: |
-          sudo apt install yq -y
+          sudo apt-get install yq -y
           VERSION=$(yq eval '.version' 'pubspec.yaml')
           echo "Version: $VERSION"
       - name: Prepare release message
