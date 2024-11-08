@@ -1,4 +1,4 @@
-name: Flutter CI
+name: Flutter Release
 
 # 创建触发打包条件：只要推送tag，就会触发版本打包
 
@@ -146,11 +146,22 @@ jobs:
         run: |
           pwd
           ls -R
+      - name: Prepare release message
+        run: |
+          pip install gitchangelog pystache mustache markdown
+          prelease=$(curl --silent "https://api.github.com/repos/jeffid/flutter_ci/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+          current="${{ github.ref_name }}"
+          sed 's|RELEASE_TAG|${{ env.TAG_NAME }}|g' ./.github/release_message.md > release.md
+          echo -e "\n\n<details markdown=1><summary>All changes from $current to the latest commit:</summary>\n\n">>release.md
+          gitchangelog "${prelease}.." >> release.md  2>&1 || echo "Error in gitchangelog"
+          echo -e "\n\n</details>">>release.md
+          # todo: package name with tag
       - name: Release app
         uses: ncipollo/release-action@v1
         with:
           artifacts: dist/*/*/*
           token: ${{ secrets.GITHUB_TOKEN }}
+          bodyFile: './release.md'
 
 
     
