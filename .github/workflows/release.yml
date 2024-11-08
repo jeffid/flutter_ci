@@ -11,8 +11,14 @@ on:
   # pull_request:
   #   branches:
   #     - main
+  # workflow_call:
+  #   inputs:
+  #     tag-name:
+  #       type: string
+  #       default: "draft"
 env:
   ENV_A: 1
+  TAG_NAME: "${{ github.ref_name }}"
   # FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
 
 jobs:
@@ -24,7 +30,8 @@ jobs:
         include:
           - platform: android
             os: ubuntu-24.04
-            targets: apk,aab
+            # targets: apk,aab
+            targets: apk
 
           - platform: macos
             os: macos-latest
@@ -52,8 +59,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - run: node -v
-
       - name: Setup Flutter
         uses: kuhnroyal/flutter-fvm-config-action/config@v3
         id: fvm-config-action
@@ -73,7 +78,7 @@ jobs:
         if: startsWith(matrix.platform,'android')
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 17
 
       # Build apk
@@ -86,38 +91,39 @@ jobs:
         run: |
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
-      - name: Build MacOS app
-        if: startsWith(matrix.platform,'macos')
-        run: |
-          npm install -g appdmg
-          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+      # - name: Build MacOS app
+      #   if: startsWith(matrix.platform,'macos')
+      #   run: |
+      #     node -v
+      #     npm install -g appdmg
+      #     flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
-      - name: Build Windows app
-        if: startsWith(matrix.platform,'windows')
-        # continue-on-error: true
-        run: |
-          wmic os get Caption,Version
-          pwd
-          # choco install innosetup -y
-          ls "C:\Program Files (x86)\Inno Setup 6\Languages"
-          cp "windows\packaging\exe\ChineseSimplified.isl" "C:\Program Files (x86)\Inno Setup 6\Languages"
-          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+      # - name: Build Windows app
+      #   if: startsWith(matrix.platform,'windows')
+      #   # continue-on-error: true
+      #   run: |
+      #     wmic os get Caption,Version
+      #     pwd
+      #     # choco install innosetup -y
+      #     ls "C:\Program Files (x86)\Inno Setup 6\Languages"
+      #     cp "windows\packaging\exe\ChineseSimplified.isl" "C:\Program Files (x86)\Inno Setup 6\Languages"
+      #     flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
-      - name: Build Linux app
-        if: startsWith(matrix.platform,'linux')
-        run: |
-          flutter doctor
-          sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev -y
-          # rpm env
-          sudo apt install rpm patchelf -y
-          # appimage env
-          sudo add-apt-repository universe -y
-          sudo apt install libfuse2t64 locate -y
-          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-          chmod +x appimagetool
-          sudo mv appimagetool /usr/local/bin/
-          # build
-          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+      # - name: Build Linux app
+      #   if: startsWith(matrix.platform,'linux')
+      #   run: |
+      #     flutter doctor
+      #     sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev -y
+      #     # rpm env
+      #     sudo apt install rpm patchelf -y
+      #     # appimage env
+      #     sudo add-apt-repository universe -y
+      #     sudo apt install libfuse2t64 locate -y
+      #     wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+      #     chmod +x appimagetool
+      #     sudo mv appimagetool /usr/local/bin/
+      #     # build
+      #     flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
       - name: Upload app
         uses: actions/upload-artifact@v4
@@ -138,6 +144,8 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Download app from artifact
         uses: actions/download-artifact@v4
         with:
@@ -146,12 +154,18 @@ jobs:
         run: |
           pwd
           ls -R
+      - name: Get pubspec.yaml version value
+        run: |
+          sudo apt install yq -y
+          VERSION=$(yq eval '.version' 'pubspec.yaml')
+          echo "Version: $VERSION"
       - name: Prepare release message
         run: |
           pip install gitchangelog pystache mustache markdown
           prelease=$(curl --silent "https://api.github.com/repos/jeffid/flutter_ci/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
           current="${{ github.ref_name }}"
           sed 's|RELEASE_TAG|${{ env.TAG_NAME }}|g' ./.github/release_message.md > release.md
+          sed 's|VERSION|${VERSION}|g' release.md > release.md
           echo -e "\n\n<details markdown=1><summary>All changes from $current to the latest commit:</summary>\n\n">>release.md
           gitchangelog "${prelease}.." >> release.md  2>&1 || echo "Error in gitchangelog"
           echo -e "\n\n</details>">>release.md
