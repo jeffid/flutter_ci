@@ -157,7 +157,7 @@ jobs:
           ls -R
       - name: Get pubspec.yaml version value
         run: |
-          snap install yq
+          sudo snap install yq
           VERSION=$(yq eval '.version' 'pubspec.yaml')
           echo "Version: $VERSION"
       - name: Prepare release message
