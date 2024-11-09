@@ -30,23 +30,22 @@ jobs:
         include:
           - platform: android
             os: ubuntu-24.04
-            # targets: apk,aab
-            targets: apk
+            targets: apk,aab
 
-          # - platform: macos
-          #   os: macos-latest
-          #   aarch: universal
-          #   targets: dmg,pkg
+          - platform: macos
+            os: macos-latest
+            aarch: universal
+            targets: dmg,pkg
 
-          # - platform: windows
-          #   os: windows-latest
-          #   aarch: amd64
-          #   targets: exe,msix
+          - platform: windows
+            os: windows-latest
+            aarch: amd64
+            targets: exe,msix
 
-          # - platform: linux
-          #   os: ubuntu-24.04
-          #   aarch: amd64
-          #   targets: appimage,deb,rpm
+          - platform: linux
+            os: ubuntu-24.04
+            aarch: amd64
+            targets: appimage,deb,rpm
   
           # - platform: ios
           #   os: macos-14
@@ -92,39 +91,39 @@ jobs:
         run: |
           flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
-      # - name: Build MacOS app
-      #   if: startsWith(matrix.platform,'macos')
-      #   run: |
-      #     node -v
-      #     npm install -g appdmg
-      #     flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+      - name: Build MacOS app
+        if: startsWith(matrix.platform,'macos')
+        run: |
+          node -v
+          npm install -g appdmg
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
-      # - name: Build Windows app
-      #   if: startsWith(matrix.platform,'windows')
-      #   # continue-on-error: true
-      #   run: |
-      #     wmic os get Caption,Version
-      #     pwd
-      #     # choco install innosetup -y
-      #     ls "C:\Program Files (x86)\Inno Setup 6\Languages"
-      #     cp "windows\packaging\exe\ChineseSimplified.isl" "C:\Program Files (x86)\Inno Setup 6\Languages"
-      #     flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+      - name: Build Windows app
+        if: startsWith(matrix.platform,'windows')
+        # continue-on-error: true
+        run: |
+          wmic os get Caption,Version
+          pwd
+          # choco install innosetup -y
+          ls "C:\Program Files (x86)\Inno Setup 6\Languages"
+          cp "windows\packaging\exe\ChineseSimplified.isl" "C:\Program Files (x86)\Inno Setup 6\Languages"
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
-      # - name: Build Linux app
-      #   if: startsWith(matrix.platform,'linux')
-      #   run: |
-      #     flutter doctor
-      #     sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev -y
-      #     # rpm env
-      #     sudo apt install rpm patchelf -y
-      #     # appimage env
-      #     sudo add-apt-repository universe -y
-      #     sudo apt install libfuse2t64 locate -y
-      #     wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-      #     chmod +x appimagetool
-      #     sudo mv appimagetool /usr/local/bin/
-      #     # build
-      #     flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
+      - name: Build Linux app
+        if: startsWith(matrix.platform,'linux')
+        run: |
+          flutter doctor
+          sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev -y
+          # rpm env
+          sudo apt install rpm patchelf -y
+          # appimage env
+          sudo add-apt-repository universe -y
+          sudo apt install libfuse2t64 locate -y
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/
+          # build
+          flutter_distributor package --platform ${{ matrix.platform }} --targets ${{ matrix.targets }}
 
       - name: Upload app
         uses: actions/upload-artifact@v4
@@ -168,7 +167,6 @@ jobs:
           pip install gitchangelog pystache mustache markdown
           # PRELEASE_TAG=$(curl --silent "https://api.github.com/repos/jeffid/flutter_ci/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
           TAG="${{ github.ref_name }}"
-
           sed -e "s|RELEASE_TAG|${TAG}|g" -e "s|VERSION|${VERSION}|g" ./.github/release_message.html > release.html
           echo -e "\n\n<details open markdown=1> <summary>All changes from $TAG to the latest commit:</summary>\n\n" >> release.html
           # gitchangelog
