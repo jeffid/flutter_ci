@@ -164,13 +164,12 @@ jobs:
         run: |
           pip install gitchangelog pystache mustache markdown
           prelease=$(curl --silent "https://api.github.com/repos/jeffid/flutter_ci/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
-          current="${{ github.ref_name }}"
-          sed 's|RELEASE_TAG|${{ env.TAG_NAME }}|g' ./.github/release_message.md > release.md
-          sed 's|VERSION|${VERSION}|g' release.md > release.md
-          echo -e "\n\n<details markdown=1><summary>All changes from $current to the latest commit:</summary>\n\n">>release.md
+          current="${{ env.TAG_NAME }}"
+          sed -e "s|RELEASE_TAG|${{ env.TAG_NAME }}|g" -e "s|VERSION|${VERSION}|g" ./.github/release_message.md > release.md
+          echo -e "\n\n<details markdown=1> <summary>All changes from $current to the latest commit:</summary>\n\n" >> release.md
+          gitchangelog
           gitchangelog "${prelease}.." >> release.md  2>&1 || echo "Error in gitchangelog"
-          echo -e "\n\n</details>">>release.md
-          # todo: package name with tag
+          echo -e "\n\n</details>" >> release.md
       - name: Release app
         uses: ncipollo/release-action@v1
         with:

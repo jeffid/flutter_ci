@@ -26,8 +26,8 @@
         <tr>
         <td>Android</td>
         <td>
-            <a href="https://github.com/j'e'f'fi'd/releases/download/RELEASE_TAG/flutter_ci-VERSION-android.apk"><img src="https://img.shields.io/badge/APK-Universal-044d29.svg?logo=android"></a><br>
-            <a href="https://github.com/j'e'f'fi'd/releases/download/RELEASE_TAG/flutter_ci-VERSION-android.aab"><img src="https://img.shields.io/badge/AAB-Universal-044d29.svg?logo=android"></a><br>
+            <a href="https://github.com/jeffid/flutter_ci/releases/download/RELEASE_TAG/flutter_ci-VERSION-android.apk"><img src="https://img.shields.io/badge/APK-Universal-044d29.svg?logo=android"></a><br>
+            <a href="https://github.com/jeffid/flutter_ci/releases/download/RELEASE_TAG/flutter_ci-VERSION-android.aab"><img src="https://img.shields.io/badge/AAB-Universal-044d29.svg?logo=android"></a><br>
         </td>
         </tr>
         <tr>
