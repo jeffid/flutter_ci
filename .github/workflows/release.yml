@@ -18,7 +18,7 @@ on:
   #       default: "draft"
 env:
   ENV_A: 1
-  # TAG_NAME: "${{ github.ref_name }}" # 这里无法获取 github.ref_name
+  TAG_NAME: "${{ github.ref_name }}" # 这里无法获取 github.ref_name
   # FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
 
 jobs:
@@ -147,35 +147,40 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Download app from artifact
         uses: actions/download-artifact@v4
         with:
           path: dist/
+
       - name: Display structure of downloaded files
         run: |
           pwd
           ls -R
-      - name: Get pubspec.yaml version value
+      - name: Prepare release message
         run: |
+          # Get pubspec.yaml version value
           sudo snap install yq
           VERSION=$(yq eval '.version' 'pubspec.yaml')
           echo "Version: $VERSION"
-      - name: Prepare release message
-        run: |
+          echo "env.TAG_NAME: ${{ env.TAG_NAME }}"
+
           pip install gitchangelog pystache mustache markdown
           # prelease=$(curl --silent "https://api.github.com/repos/jeffid/flutter_ci/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
           TAG_NAME="${{ github.ref_name }}"
-          sed -e "s|RELEASE_TAG|${TAG_NAME}|g" -e "s|VERSION|${VERSION}|g" ./.github/release_message.md > release.md
-          echo -e "\n\n<details markdown=1> <summary>All changes from $TAG_NAME to the latest commit:</summary>\n\n" >> release.md
+
+          sed -e "s|RELEASE_TAG|${TAG_NAME}|g" -e "s|VERSION|${VERSION}|g" ./.github/release_message.html > release.html
+          echo -e "\n\n<details open markdown=1> <summary>All changes from $TAG_NAME to the latest commit:</summary>\n\n" >> release.html
           # gitchangelog
-          gitchangelog >> release.md  2>&1 || echo "Error in gitchangelog"
-          echo -e "\n\n</details>" >> release.md
+          gitchangelog >> release.html  2>&1 || echo "Error in gitchangelog"
+          echo -e "\n\n</details>" >> release.html
+
       - name: Release app
         uses: ncipollo/release-action@v1
         with:
           artifacts: dist/*/*/*
           token: ${{ secrets.GITHUB_TOKEN }}
-          bodyFile: './release.md'
+          bodyFile: './release.html'
 
 
     
